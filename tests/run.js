@@ -18,5 +18,8 @@ require('./chess.test');
 console.log('▶ Caro/Gomoku');
 require('./caro.test');
 
+console.log('▶ Bầu Cua');
+require('./baucua.test');
+
 const ok = harness.report();
 process.exit(ok ? 0 : 1);

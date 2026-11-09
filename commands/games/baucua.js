@@ -1,85 +1,119 @@
 'use strict';
 
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { validateBet, getOrCreateUser } = require('../../utils/economy');
-const { placeBet, settleWin, settleLoss, refundBet } = require('../../utils/games');
-const { COLORS } = require('../../utils/ui');
+const { SlashCommandBuilder } = require('discord.js');
+const { getOrCreateUser } = require('../../utils/economy');
+const { placeBet, refundBet } = require('../../utils/games');
+const { baseEmbed, COLORS } = require('../../utils/ui');
+const baucua = require('../../games/baucua');
 const logger = require('../../utils/logger');
 
-const GAME = 'baucua';
-const SYMBOLS = [
-    { key: 'bau', name: 'Bầu', emoji: '🍐' },
-    { key: 'cua', name: 'Cua', emoji: '🦀' },
-    { key: 'tom', name: 'Tôm', emoji: '🦐' },
-    { key: 'ca', name: 'Cá', emoji: '🐟' },
-    { key: 'ga', name: 'Gà', emoji: '🐓' },
-    { key: 'nai', name: 'Nai', emoji: '🦌' },
-];
+const GAME = baucua.GAME;
+const SYMBOLS = baucua.SYMBOLS;
+
+function betOptions(builder) {
+    for (const s of SYMBOLS) {
+        builder.addIntegerOption((o) => o
+            .setName(s.key)
+            .setDescription(`Số xu đặt vào ${s.name} ${s.emoji}`)
+            .setMinValue(50)
+            .setMaxValue(5000));
+    }
+    return builder;
+}
+
+function formatTicket(bets) {
+    return bets
+        .map((b) => {
+            const s = baucua.getSymbol(b.key);
+            return `${s.emoji} **${s.name}** — ${b.amount.toLocaleString()} xu`;
+        })
+        .join('\n');
+}
+
+function formatResult(result) {
+    return result.lines
+        .map((line) => {
+            const sign = line.profit >= 0 ? '+' : '';
+            const detail = line.matches > 0
+                ? `trúng **${line.matches}** viên → ${sign}${line.profit.toLocaleString()} xu`
+                : `trượt → ${line.profit.toLocaleString()} xu`;
+            return `${line.symbol.emoji} **${line.symbol.name}** — ${detail}`;
+        })
+        .join('\n');
+}
 
 module.exports = {
     cooldown: 2,
-    data: new SlashCommandBuilder()
+    data: betOptions(new SlashCommandBuilder()
         .setName('baucua')
-        .setDescription('Bầu Cua — đặt vào một linh vật, mỗi viên xúc xắc trúng trả 1:1')
-        .addStringOption((o) => o
-            .setName('linh_vat')
-            .setDescription('Linh vật muốn đặt')
-            .setRequired(true)
-            .addChoices(...SYMBOLS.map((s) => ({ name: `${s.emoji} ${s.name}`, value: s.key }))))
-        .addIntegerOption((o) => o.setName('cuoc').setDescription('Số xu đặt cược').setRequired(true).setMinValue(50).setMaxValue(5000)),
+        .setDescription('Bầu Cua — đặt nhiều linh vật cùng lúc, mỗi viên trúng trả 1:1')),
 
     async execute(interaction) {
-        const choice = interaction.options.getString('linh_vat', true);
-        const stake = interaction.options.getInteger('cuoc', true);
-        const symbol = SYMBOLS.find((s) => s.key === choice);
+        const bets = SYMBOLS
+            .map((s) => ({ key: s.key, amount: interaction.options.getInteger(s.key) || 0 }))
+            .filter((b) => b.amount > 0);
 
-        const check = validateBet(interaction.user.id, stake, interaction.user.username);
-        if (!check.valid) return interaction.reply({ content: check.message, ephemeral: true });
+        if (bets.length === 0) {
+            return interaction.reply({
+                content: '❌ Hãy đặt ít nhất một linh vật, ví dụ: `/baucua bau:500 cua:200`',
+                ephemeral: true,
+            });
+        }
 
-        const bet = placeBet(interaction.user.id, interaction.guildId, GAME, stake);
+        const totalStake = bets.reduce((sum, b) => sum + b.amount, 0);
+        const user = getOrCreateUser(interaction.user.id, interaction.user.username);
+        if (user.balance < totalStake) {
+            return interaction.reply({
+                content: `❌ Bạn không đủ xu! Tổng cược **${totalStake.toLocaleString()} xu**, số dư: **${user.balance.toLocaleString()} xu**`,
+                ephemeral: true,
+            });
+        }
+
+        const bet = placeBet(interaction.user.id, interaction.guildId, GAME, totalStake);
         if (!bet.ok) return interaction.reply({ content: bet.message, ephemeral: true });
 
         let settled = false;
         try {
             await interaction.reply({
-                embeds: [new EmbedBuilder()
-                    .setColor(COLORS.warning)
-                    .setTitle('🎲 Bầu Cua')
-                    .setDescription(`🫙 **Đang lắc...**\nCược **${stake.toLocaleString()} xu** vào **${symbol.emoji} ${symbol.name}**`)],
+                embeds: [baseEmbed({
+                    color: COLORS.warning,
+                    title: '🎲 Bầu Cua',
+                    description: `🫙 **Đang lắc...**\n\n${formatTicket(bets)}\n\n💰 Tổng cược: **${totalStake.toLocaleString()} xu**`,
+                })],
             });
             await new Promise((r) => setTimeout(r, 1200));
 
-            const dice = [0, 1, 2].map(() => Math.floor(Math.random() * SYMBOLS.length));
-            const matches = dice.filter((d) => SYMBOLS[d].key === choice).length;
-            const multiplier = 1 + matches;
-
-            if (matches > 0) settleWin(interaction.user.id, interaction.guildId, GAME, stake, multiplier);
-            else settleLoss(interaction.user.id, interaction.guildId, GAME, stake);
+            const result = baucua.evaluate(bets);
+            const balance = baucua.settle(interaction.user.id, interaction.guildId, result);
             settled = true;
 
-            const user = getOrCreateUser(interaction.user.id);
-            const net = matches > 0 ? stake * multiplier - stake : -stake;
-            const faces = dice.map((d) => SYMBOLS[d].emoji).join('  ');
+            const faces = result.dice.map((d) => SYMBOLS[d].emoji).join('  ');
+            const netSign = result.net >= 0 ? '+' : '';
+            const summary = result.net > 0
+                ? `🎉 Lời **${netSign}${result.net.toLocaleString()} xu**`
+                : result.net < 0
+                    ? `😢 Lỗ **${result.net.toLocaleString()} xu**`
+                    : '🤝 Hoà vốn';
 
             await interaction.editReply({
-                embeds: [new EmbedBuilder()
-                    .setColor(net >= 0 ? COLORS.success : COLORS.danger)
-                    .setTitle('🎲 Bầu Cua')
-                    .setDescription([
+                embeds: [baseEmbed({
+                    color: result.net > 0 ? COLORS.success : result.net < 0 ? COLORS.danger : COLORS.warning,
+                    title: '🎲 Bầu Cua',
+                    description: [
                         `🎲 ${faces}`,
-                        `Trúng **${matches}** viên ${symbol.emoji} **${symbol.name}**`,
                         '',
-                        matches > 0
-                            ? `🎉 Thắng **+${net.toLocaleString()} xu** (x${multiplier})`
-                            : `😢 Thua **-${stake.toLocaleString()} xu**`,
-                        `💵 Số dư: **${user.balance.toLocaleString()} xu**`,
-                    ].join('\n'))
-                    .setTimestamp()],
+                        formatResult(result),
+                        '',
+                        `${summary} • 💵 Số dư: **${balance.toLocaleString()} xu**`,
+                    ].join('\n'),
+                })],
             });
         } catch (err) {
             logger.error('[baucua]', err);
-            if (!settled) refundBet(interaction.user.id, interaction.guildId, GAME, stake);
-            if (interaction.replied || interaction.deferred) await interaction.editReply({ content: '❌ Lỗi — đã hoàn cược.', embeds: [] }).catch(() => null);
+            if (!settled) refundBet(interaction.user.id, interaction.guildId, GAME, totalStake);
+            if (interaction.replied || interaction.deferred) {
+                await interaction.editReply({ content: '❌ Lỗi — đã hoàn cược.', embeds: [] }).catch(() => null);
+            }
         }
     },
 };
