@@ -1,15 +1,18 @@
+'use strict';
+
 const { SlashCommandBuilder } = require('discord.js');
+const { prepareControl } = require('../utils/music');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('stop')
-        .setDescription('Dừng phát nhạc hoàn toàn và xóa sạch hàng đợi'),
-    
+        .setDescription('Dừng phát nhạc và xoá hàng đợi'),
+
     async execute(interaction) {
-        const queue = interaction.client.distube.getQueue(interaction.guildId);
-        if (!queue) return interaction.reply({ content: '❌ Bot có đang phát nhạc đâu mà dừng!', ephemeral: true });
+        const queue = await prepareControl(interaction);
+        if (!queue) return;
 
         await queue.stop();
-        await interaction.reply('⏹️ Đã dừng phát nhạc và xóa sạch danh sách hàng đợi theo lệnh!');
+        await interaction.reply('⏹️ Đã dừng phát nhạc và xoá hàng đợi.');
     },
 };

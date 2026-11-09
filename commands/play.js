@@ -1,27 +1,38 @@
+'use strict';
+
 const { SlashCommandBuilder } = require('discord.js');
+const { preparePlay, getQueue, guildSettings } = require('../utils/music');
+const { errorEmbed, successEmbed } = require('../utils/ui');
+const logger = require('../utils/logger');
 
 module.exports = {
+    cooldown: 2,
     data: new SlashCommandBuilder()
         .setName('play')
-        .setDescription('Phát nhạc từ link Spotify, YouTube hoặc SoundCloud')
-        .addStringOption(option =>
-            option.setName('link')
-                .setDescription('Dán link Playlist hoặc bài hát vào đây')
-                .setRequired(true)),
-    
+        .setDescription('Phát nhạc từ YouTube, Spotify, SoundCloud hoặc từ khoá tìm kiếm')
+        .addStringOption((option) =>
+            option
+                .setName('link')
+                .setDescription('Link bài hát/playlist hoặc từ khoá tìm kiếm')
+                .setRequired(true)
+                .setMaxLength(500)),
+
     async execute(interaction) {
-        const voiceChannel = interaction.member.voice.channel;
-        if (!voiceChannel) {
+        const voiceChannel = await preparePlay(interaction);
+        if (!voiceChannel) return;
+
+        const query = interaction.options.getString('link', true).trim();
+
+        // Chặn trước khi thêm: tránh hàng đợi phình vô hạn.
+        const maxQueue = guildSettings(interaction.guildId).max_queue;
+        const current = getQueue(interaction.client, interaction.guildId);
+        if (current && current.songs.length >= maxQueue) {
             return interaction.reply({
-                content: '❌ Bạn phải vào một **Kênh Thoại (Voice Channel)** trước!',
+                embeds: [errorEmbed(`Hàng đợi đã đạt giới hạn **${maxQueue} bài**. Hãy dùng \`/clear\` hoặc chờ bot phát bớt!`)],
                 ephemeral: true,
             });
         }
 
-        const query = interaction.options.getString('link');
-
-        // Defer reply ngay lập tức để tránh lỗi "Unknown Message" (10008)
-        // Discord cho phép 15 phút để editReply sau khi deferReply
         await interaction.deferReply();
 
         try {
@@ -30,21 +41,14 @@ module.exports = {
                 textChannel: interaction.channel,
             });
 
-            // Nếu không có lỗi nào được throw, chỉ cần xác nhận đã nhận lệnh
-            // Thông báo "Đang phát" sẽ đến từ sự kiện playSong / addSong trong index.js
-            await interaction.editReply(`✅ Đã nhận lệnh! Đang xử lý \`${query}\`...`);
-
-        } catch (error) {
-            console.error('[play.js ERROR]', error);
-            // Chỉ editReply nếu interaction chưa bị xóa
-            try {
-                await interaction.editReply({
-                    content: `❌ **Lỗi:** ${error.message?.slice(0, 200) ?? 'Không thể phát link này.'}`,
-                });
-            } catch (editErr) {
-                // Interaction đã hết hạn hoặc bị xóa, bỏ qua
-                console.error('[play.js] editReply failed:', editErr.code, editErr.message);
-            }
+            await interaction.editReply({
+                embeds: [successEmbed(`Đã nhận: \`${query.slice(0, 200)}\`\nBài đang phát sẽ hiện ở panel bên dưới.`, '🎵 Đã thêm vào hàng đợi')],
+            });
+        } catch (err) {
+            logger.warn('[play]', err.message);
+            await interaction.editReply({
+                embeds: [errorEmbed(`Không phát được: ${String(err.message || err).slice(0, 400)}`)],
+            }).catch(() => null);
         }
     },
 };

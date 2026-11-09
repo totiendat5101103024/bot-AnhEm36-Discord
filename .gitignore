@@ -9,6 +9,7 @@ node_modules/
 # Dữ liệu runtime
 data/*
 !data/.gitkeep
+!data/trivia.json
 
 # Log & backup
 logs/

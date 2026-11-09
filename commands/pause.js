@@ -1,4 +1,7 @@
+'use strict';
+
 const { SlashCommandBuilder } = require('discord.js');
+const { prepareControl } = require('../utils/music');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -6,14 +9,12 @@ module.exports = {
         .setDescription('Tạm dừng bài hát đang phát'),
 
     async execute(interaction) {
-        const queue = interaction.client.distube.getQueue(interaction.guildId);
-        if (!queue) return interaction.reply({ content: '❌ Hiện tại không có bài hát nào đang phát!', ephemeral: true });
+        const queue = await prepareControl(interaction);
+        if (!queue) return;
 
-        if (queue.paused) {
-            return interaction.reply({ content: '⏸️ Bài hát đã đang tạm dừng rồi!', ephemeral: true });
-        }
+        if (queue.paused) return interaction.reply({ content: '⏸️ Bài hát đã đang tạm dừng rồi!', ephemeral: true });
 
-        queue.pause();
-        await interaction.reply('⏸️ Đã tạm dừng bài hát!');
+        await queue.pause();
+        await interaction.reply('⏸️ Đã tạm dừng bài hát.');
     },
 };

@@ -12,7 +12,7 @@
  *
  * Tính năng v2:
  *   - Prefetch: chủ động lấy stream URL cho bài tiếp theo trong queue
- *   - Cache stream URL với TTL 5 phút
+ *   - Cache stream URL với TTL 45 phút (tối đa 100 entry)
  *   - Auto re-resolve khi URL hết hạn (403/expired)
  *
  * v3:
@@ -37,7 +37,11 @@ const YTDLP_BIN = process.env.YTDLP_PATH
 
 // Map<songCacheKey, { url: string, timestamp: number }>
 const streamCache = new Map();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 phút — URL YouTube thường có thời hạn vài giờ
+const CACHE_TTL_MS = 45 * 60 * 1000; // 45 phút — URL YouTube thường sống vài giờ
+const CACHE_MAX_ENTRIES = 100;
+
+// Map<key, Promise<string>> — tránh 2 lần resolve cùng một bài
+const inFlight = new Map();
 
 // ─────────────────────────────────────────────────────────────
 // Warm-up stream URL
@@ -50,9 +54,11 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 phút — URL YouTube thường có th�
 // Giải pháp: chủ động "đánh thức" URL bằng 1 request Range nhỏ và chờ
 // cho tới khi nhận 200/206 trước khi trả URL cho ffmpeg.
 const STREAM_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36';
-const WARMUP_ATTEMPTS = 20;      // tối đa ~10 giây (20 × 500ms)
-const WARMUP_DELAY_MS = 500;
-const WARMUP_TIMEOUT_MS = 5000;
+// Giảm mạnh so với bản cũ: trước đây có thể chặn tới ~110 giây/bài.
+// Nếu 4 lần vẫn fail, để ffmpeg/DisTube tự retry thay vì treo hàng đợi.
+const WARMUP_ATTEMPTS = 4;       // tối đa ~13 giây
+const WARMUP_DELAY_MS = 300;
+const WARMUP_TIMEOUT_MS = 3000;
 
 async function warmUpStreamURL(url) {
     let lastStatus = null;
@@ -118,8 +124,8 @@ function getCachedStream(song) {
 function setCachedStream(song, url) {
     const key = getCacheKey(song);
     streamCache.set(key, { url, timestamp: Date.now() });
-    // Giới hạn cache tối đa 50 entry để tránh memory leak
-    if (streamCache.size > 50) {
+    // Giới hạn cache để tránh memory leak
+    while (streamCache.size > CACHE_MAX_ENTRIES) {
         const oldest = streamCache.keys().next().value;
         streamCache.delete(oldest);
     }
@@ -462,6 +468,22 @@ class YtDlpExtractorPlugin extends ExtractorPlugin {
     }
 
     /**
+     * searchSongs() — tìm nhiều kết quả để hiển thị select menu.
+     */
+    async searchSongs(query, limit = 5, options = {}) {
+        const n = Math.max(1, Math.min(Number(limit) || 5, 10));
+        const args = [
+            `ytsearch${n}:${query}`,
+            '--dump-json',
+            '--playlist-end', String(n),
+            '-f', 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
+            '--no-warnings',
+        ];
+        const infos = await runYtDlp(args, 30000);
+        return infos.slice(0, n).map((info) => new Song(toSongInfo(this, info), options));
+    }
+
+    /**
      * prefetchStreamURL() — chủ động lấy stream URL cho 1 bài và cache lại.
      * Được gọi từ index.js khi event 'playSong' để chuẩn bị sẵn cho bài tiếp theo.
      */
@@ -479,10 +501,23 @@ class YtDlpExtractorPlugin extends ExtractorPlugin {
     }
 
     /**
-     * _fetchStreamURL() — logic lõi lấy stream URL (không cache).
-     * Được dùng bởi cả getStreamURL() và prefetchStreamURL().
+     * _fetchStreamURL() — dedupe các lần gọi trùng bài.
      */
     async _fetchStreamURL(song) {
+        const key = `${getCacheKey(song)}::${song.url || ''}`;
+        if (inFlight.has(key)) return inFlight.get(key);
+
+        const promise = this._fetchStreamURLInner(song)
+            .finally(() => inFlight.delete(key));
+        inFlight.set(key, promise);
+        return promise;
+    }
+
+    /**
+     * _fetchStreamURLInner() — logic lõi lấy stream URL (không cache).
+     * Được dùng bởi cả getStreamURL() và prefetchStreamURL().
+     */
+    async _fetchStreamURLInner(song) {
         // Nếu là bài trong Spotify playlist chưa được search → search trước
         if (song._searchQuery || (getSpotifyType(song.url) && !song.stream?.url)) {
             const query = song._searchQuery

@@ -1,6 +1,8 @@
-const { SlashCommandBuilder } = require('discord.js');
+'use strict';
 
-// DisTube v5 repeatMode: 0 = tắt, 1 = lặp 1 bài, 2 = lặp cả hàng đợi
+const { SlashCommandBuilder } = require('discord.js');
+const { prepareControl } = require('../utils/music');
+
 const MODE_MAP = { off: 0, song: 1, queue: 2 };
 const MODE_LABEL = {
     0: '⏹️ Đã **tắt** lặp lại.',
@@ -11,9 +13,10 @@ const MODE_LABEL = {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('loop')
-        .setDescription('Bật/tắt chế độ lặp lại bài hát hoặc hàng đợi')
-        .addStringOption(option =>
-            option.setName('che_do')
+        .setDescription('Bật/tắt lặp lại bài hát hoặc hàng đợi')
+        .addStringOption((option) =>
+            option
+                .setName('che_do')
                 .setDescription('Chọn chế độ lặp')
                 .setRequired(true)
                 .addChoices(
@@ -23,12 +26,10 @@ module.exports = {
                 )),
 
     async execute(interaction) {
-        const queue = interaction.client.distube.getQueue(interaction.guildId);
-        if (!queue) return interaction.reply({ content: '❌ Hiện tại không có bài hát nào đang phát!', ephemeral: true });
+        const queue = await prepareControl(interaction);
+        if (!queue) return;
 
-        const cheDo = interaction.options.getString('che_do');
-        const newMode = queue.setRepeatMode(MODE_MAP[cheDo]);
-
-        await interaction.reply(MODE_LABEL[newMode]);
+        const mode = queue.setRepeatMode(MODE_MAP[interaction.options.getString('che_do', true)]);
+        await interaction.reply(MODE_LABEL[mode]);
     },
 };

@@ -1,117 +1,92 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { validateBet, addBalance, subtractBalance, getOrCreateUser } = require('../utils/economy');
+'use strict';
 
-// ─── /slots — Máy slot 3 ô emoji ─────────────────────────────
-// Tỉ lệ thưởng:
-//   3 giống nhau  → x5 cược
-//   2 giống nhau  → x1.5 cược
-//   Khác nhau hết → mất cược
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { validateBet, getOrCreateUser } = require('../utils/economy');
+const { placeBet, settleWin, settleLoss, refundBet } = require('../utils/games');
+const { COLORS } = require('../utils/ui');
+const logger = require('../utils/logger');
 
 const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '💎', '🍀', '⭐'];
+const GAME = 'slots';
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('slots')
-        .setDescription('Quay máy slot 3 ô — 3 giống x5, 2 giống x1.5!')
-        .addIntegerOption(option =>
-            option.setName('cuoc')
-                .setDescription('Số xu muốn đặt cược')
-                .setRequired(true)
-                .setMinValue(50)),
+        .setDescription('Máy slot 3 ô — 3 giống x5, 2 giống x1.5')
+        .addIntegerOption((option) =>
+            option.setName('cuoc').setDescription('Số xu đặt cược').setRequired(true).setMinValue(50)),
 
     async execute(interaction) {
+        const stake = interaction.options.getInteger('cuoc', true);
+
+        const check = validateBet(interaction.user.id, stake, interaction.user.username);
+        if (!check.valid) return interaction.reply({ content: check.message, ephemeral: true });
+
+        const bet = placeBet(interaction.user.id, interaction.guildId, GAME, stake);
+        if (!bet.ok) return interaction.reply({ content: bet.message, ephemeral: true });
+
+        let settled = false;
         try {
-            const cuoc = interaction.options.getInteger('cuoc');
-            const check = validateBet(interaction.user.id, cuoc, interaction.user.username);
-            if (!check.valid) {
-                return interaction.reply({ content: check.message, ephemeral: true });
-            }
+            await interaction.reply({
+                embeds: [new EmbedBuilder()
+                    .setColor(COLORS.warning)
+                    .setTitle('🎰 Máy Slot')
+                    .setDescription(`╔══════════╗\n║  ❓ ❓ ❓  ║\n╚══════════╝\n\n🎰 **Đang quay...** Cược **${stake.toLocaleString()} xu**`)
+                    .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })],
+            });
 
-            // Animation: Spinning
-            const loadingEmbed = new EmbedBuilder()
-                .setColor(0xFFAA00)
-                .setTitle('🎰 Máy Slot')
-                .setDescription([
-                    `╔══════════╗`,
-                    `║  ❓ ❓ ❓  ║`,
-                    `╚══════════╝`,
-                    ``,
-                    `🎰 **Đang quay...** Cược: **${cuoc.toLocaleString()} xu**`,
-                ].join('\n'))
-                .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL() });
+            await new Promise((r) => setTimeout(r, 1300));
 
-            await interaction.reply({ embeds: [loadingEmbed] });
-            await new Promise(r => setTimeout(r, 1500));
-
-            // Kết quả random
-            const results = [
-                SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-                SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-                SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-            ];
-
-            // Đếm biểu tượng giống nhau
+            const results = [1, 2, 3].map(() => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]);
             const counts = {};
-            results.forEach(s => { counts[s] = (counts[s] || 0) + 1; });
+            for (const symbol of results) counts[symbol] = (counts[symbol] || 0) + 1;
             const maxCount = Math.max(...Object.values(counts));
 
             let multiplier = 0;
-            let resultTitle = '';
-            let resultColor = 0xFF4444;
+            let title = '😢 **Trượt!** Không có biểu tượng nào giống nhau.';
+            let color = COLORS.danger;
 
             if (maxCount === 3) {
-                // JACKPOT — 3 giống nhau
                 multiplier = 5;
-                resultTitle = '🎊 **JACKPOT!** 3 giống nhau — x5 cược!';
-                resultColor = 0xFFD700;
+                title = '🎊 **JACKPOT!** 3 giống nhau — x5 cược!';
+                color = COLORS.gold;
             } else if (maxCount === 2) {
-                // 2 giống nhau
                 multiplier = 1.5;
-                resultTitle = '🎉 **Trúng!** 2 giống nhau — x1.5 cược!';
-                resultColor = 0x00FF88;
-            } else {
-                // Thua
-                multiplier = 0;
-                resultTitle = '😢 **Trượt!** Không có biểu tượng nào giống nhau.';
+                title = '🎉 **Trúng!** 2 giống nhau — x1.5 cược!';
+                color = COLORS.success;
             }
 
-            let balanceChange = '';
-            if (multiplier > 0) {
-                const winnings = Math.floor(cuoc * multiplier) - cuoc; // Lãi ròng
-                addBalance(interaction.user.id, winnings);
-                balanceChange = `📈 **+${winnings.toLocaleString()} xu**`;
-            } else {
-                subtractBalance(interaction.user.id, cuoc);
-                balanceChange = `📉 **-${cuoc.toLocaleString()} xu**`;
-            }
+            const balance = multiplier > 0
+                ? settleWin(interaction.user.id, interaction.guildId, GAME, stake, multiplier)
+                : settleLoss(interaction.user.id, interaction.guildId, GAME, stake);
+            settled = true;
 
             const user = getOrCreateUser(interaction.user.id);
+            const net = multiplier > 0 ? Math.floor(stake * multiplier) - stake : -stake;
 
-            const resultEmbed = new EmbedBuilder()
-                .setColor(resultColor)
-                .setTitle('🎰 Máy Slot')
-                .setDescription([
-                    `╔══════════╗`,
-                    `║  ${results[0]}  ${results[1]}  ${results[2]}  ║`,
-                    `╚══════════╝`,
-                    ``,
-                    resultTitle,
-                    balanceChange,
-                    ``,
-                    `💵 Số dư: **${user.balance.toLocaleString()} xu**`,
-                ].join('\n'))
-                .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })
-                .setTimestamp();
-
-            await interaction.editReply({ embeds: [resultEmbed] });
-        } catch (error) {
-            console.error('[slots.js ERROR]', error);
-            const msg = '❌ Có lỗi khi quay slot!';
-            if (interaction.replied || interaction.deferred) {
-                await interaction.editReply({ content: msg, embeds: [] });
-            } else {
-                await interaction.reply({ content: msg, ephemeral: true });
-            }
+            await interaction.editReply({
+                embeds: [new EmbedBuilder()
+                    .setColor(color)
+                    .setTitle('🎰 Máy Slot')
+                    .setDescription([
+                        '╔══════════╗',
+                        `║  ${results.join('  ')}  ║`,
+                        '╚══════════╝',
+                        '',
+                        title,
+                        `${net >= 0 ? '📈' : '📉'} **${net >= 0 ? '+' : ''}${net.toLocaleString()} xu**`,
+                        '',
+                        `💵 Số dư: **${user.balance.toLocaleString()} xu**`,
+                    ].join('\n'))
+                    .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })
+                    .setTimestamp()],
+            });
+        } catch (err) {
+            logger.error('[slots]', err);
+            if (!settled) refundBet(interaction.user.id, interaction.guildId, GAME, stake);
+            const msg = '❌ Có lỗi khi quay slot — đã hoàn cược.';
+            if (interaction.replied || interaction.deferred) await interaction.editReply({ content: msg, embeds: [] }).catch(() => null);
+            else await interaction.reply({ content: msg, ephemeral: true }).catch(() => null);
         }
     },
 };
