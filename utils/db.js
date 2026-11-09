@@ -217,6 +217,24 @@ function migrate() {
         version = 6;
     }
 
+    if (version < 7) {
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS trivia_daily (
+                guild_id TEXT NOT NULL,
+                date_key TEXT NOT NULL,
+                rewarded INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (guild_id, date_key)
+            );
+
+            CREATE TABLE IF NOT EXISTS trivia_cooldown (
+                user_id         TEXT PRIMARY KEY,
+                last_correct_at INTEGER NOT NULL
+            );
+        `);
+        db.pragma('user_version = 7');
+        version = 7;
+    }
+
     logger.info(`[db] Đã mở ${DB_PATH} (schema v${version})`);
 }
 

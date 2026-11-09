@@ -21,5 +21,8 @@ require('./caro.test');
 console.log('▶ Bầu Cua');
 require('./baucua.test');
 
+console.log('▶ Trivia');
+require('./trivia.test');
+
 const ok = harness.report();
 process.exit(ok ? 0 : 1);

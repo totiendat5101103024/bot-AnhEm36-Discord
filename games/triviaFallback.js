@@ -1,0 +1,35 @@
+'use strict';
+
+/**
+ * triviaFallback.js — bộ câu hỏi dự phòng khi thiếu hoặc lỗi data/trivia.json.
+ * Không dùng khi file chính hợp lệ.
+ */
+
+module.exports = [
+    { q: 'Thủ đô của Việt Nam là thành phố nào?', choices: ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Huế'], answer: 0 },
+    { q: 'Hành tinh nào gần Mặt Trời nhất?', choices: ['Sao Kim', 'Sao Thủy', 'Trái Đất', 'Sao Hỏa'], answer: 1 },
+    { q: 'Nước nào có diện tích lớn nhất thế giới?', choices: ['Trung Quốc', 'Canada', 'Nga', 'Mỹ'], answer: 2 },
+    { q: "Tác giả của 'Truyện Kiều' là ai?", choices: ['Nguyễn Du', 'Nguyễn Trãi', 'Hồ Xuân Hương', 'Nguyễn Đình Chiểu'], answer: 0 },
+    { q: "Nguyên tố hóa học có ký hiệu 'O' là gì?", choices: ['Vàng', 'Oxy', 'Osmi', 'Oganesson'], answer: 1 },
+    { q: 'Con sông dài nhất Việt Nam là sông nào?', choices: ['Sông Hồng', 'Sông Đồng Nai', 'Sông Mekong', 'Sông Mã'], answer: 2 },
+    { q: 'Trong bóng đá, một đội có bao nhiêu cầu thủ trên sân?', choices: ['10', '11', '12', '9'], answer: 1 },
+    { q: 'Ngôn ngữ lập trình nào được đặt tên theo một loài rắn?', choices: ['Java', 'Ruby', 'Python', 'Swift'], answer: 2 },
+    { q: 'Ai là người đầu tiên đặt chân lên Mặt Trăng?', choices: ['Yuri Gagarin', 'Neil Armstrong', 'Buzz Aldrin', 'Michael Collins'], answer: 1 },
+    { q: 'Quốc gia nào có dân số đông nhất thế giới (2024)?', choices: ['Trung Quốc', 'Ấn Độ', 'Mỹ', 'Indonesia'], answer: 1 },
+    { q: 'Đại học nào được thành lập đầu tiên ở Việt Nam?', choices: ['Đại học Quốc gia Hà Nội', 'Đại học Bách khoa Hà Nội', 'Văn Miếu – Quốc Tử Giám', 'Đại học Sư phạm Hà Nội'], answer: 2 },
+    { q: "Thành phố nào được gọi là 'Thành phố hoa phượng đỏ'?", choices: ['Hải Phòng', 'Đà Nẵng', 'Vũng Tàu', 'Biên Hòa'], answer: 0 },
+    { q: 'Một năm nhuận có bao nhiêu ngày?', choices: ['365', '366', '364', '367'], answer: 1 },
+    { q: 'Chất khí nào chiếm nhiều nhất trong khí quyển Trái Đất?', choices: ['Oxy', 'Cacbonic', 'Nitơ', 'Argon'], answer: 2 },
+    { q: 'Ai viết bản Tuyên ngôn Độc lập của Việt Nam năm 1945?', choices: ['Hồ Chí Minh', 'Võ Nguyên Giáp', 'Phạm Văn Đồng', 'Trường Chinh'], answer: 0 },
+    { q: "Loài động vật nào được mệnh danh là 'chúa sơn lâm'?", choices: ['Sư tử', 'Hổ', 'Báo', 'Gấu'], answer: 1 },
+    { q: 'Trong toán học, số Pi xấp xỉ bằng bao nhiêu?', choices: ['3.14', '2.71', '1.61', '4.20'], answer: 0 },
+    { q: 'Quốc gia nào nổi tiếng với kim tự tháp Giza?', choices: ['Hy Lạp', 'Ai Cập', 'Mexico', 'Peru'], answer: 1 },
+    { q: 'Bộ phim nào của Việt Nam từng đề cử Oscar?', choices: ['Mắt biếc', 'Tôi thấy hoa vàng trên cỏ xanh', 'Em chưa 18', 'Bố già'], answer: 1 },
+    { q: 'Tỉnh nào có diện tích lớn nhất Việt Nam?', choices: ['Nghệ An', 'Sơn La', 'Gia Lai', 'Thanh Hóa'], answer: 0 },
+    { q: 'Đơn vị đo cường độ dòng điện là gì?', choices: ['Vôn', 'Oát', 'Ampe', 'Ôm'], answer: 2 },
+    { q: 'Loại trái cây nào chứa nhiều vitamin C nhất trong các lựa chọn?', choices: ['Chuối', 'Ổi', 'Táo', 'Nho'], answer: 1 },
+    { q: 'Ai là tác giả của thuyết tương đối?', choices: ['Isaac Newton', 'Albert Einstein', 'Nikola Tesla', 'Stephen Hawking'], answer: 1 },
+    { q: 'Ngày Quốc tế Phụ nữ là ngày nào?', choices: ['8/3', '20/10', '1/6', '20/11'], answer: 0 },
+    { q: "Hành tinh nào được gọi là 'Hành tinh Đỏ'?", choices: ['Sao Kim', 'Sao Mộc', 'Sao Hỏa', 'Sao Thổ'], answer: 2 },
+    { q: 'Môn thể thao nào sử dụng vợt và quả cầu lông?', choices: ['Tennis', 'Cầu lông', 'Bóng bàn', 'Squash'], answer: 1 },
+];

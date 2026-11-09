@@ -10,6 +10,7 @@ node_modules/
 data/*
 !data/.gitkeep
 !data/trivia.json
+!data/trivia-config.json
 
 # Log & backup
 logs/

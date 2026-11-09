@@ -7,7 +7,7 @@ module.exports = {
     cooldown: 8,
     data: new SlashCommandBuilder()
         .setName('trivia')
-        .setDescription('Câu hỏi đố vui — trả lời đúng đầu tiên nhận 150 xu'),
+        .setDescription('Câu hỏi đố vui — trả lời đúng nhận thưởng theo quỹ ngày'),
 
     async execute(interaction) {
         await trivia.start(interaction);

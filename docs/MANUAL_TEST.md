@@ -28,6 +28,7 @@ Mỗi mục ghi rõ **cách làm** và **kết quả mong đợi**. Đánh dấu
 - [ ] `/balance` hiện số xu đúng.
 - [ ] `/leaderboard-xu` hiện top người nhiều xu.
 - [ ] Chuyển xu qua game: thắng/thua cập nhật số dư, không âm quá mức.
+- [ ] `/chuyenxu @user 1000`: trừ đúng người gửi, cộng đúng người nhận, chặn tự chuyển/bot/vượt số dư.
 - [ ] Restart bot khi đang có ván cược → số dư/escrow được hoàn đúng.
 
 ## 3. Game
@@ -39,6 +40,9 @@ Mỗi mục ghi rõ **cách làm** và **kết quả mong đợi**. Đánh dấu
 - [ ] `/poker` 2–6 người: chia bài, tố, fold, showdown, chia pot (kể cả side pot).
 - [ ] `/pokerbot`: bot Monte Carlo chơi được, không treo.
 - [ ] `/trivia`: trả lời đúng/sai, hết giờ xử lý đúng.
+- [ ] `/trivia` đúng lượt 1 nhận 500, lượt 2 nhận 300, lượt 3 nhận 100, lượt 4 nhận 50, lượt 5 nhận 0.
+- [ ] Trả lời đúng xong bấm tiếp trong 30 giây → báo cooldown, không tiêu lượt thưởng.
+- [ ] Sửa `data/trivia.json` / `data/trivia-config.json` rồi `/trivia-reload` → áp dụng ngay, không restart.
 - [ ] `/game-stats`: thống kê khớp các ván vừa chơi.
 
 ## 4. Board game async

@@ -71,8 +71,8 @@ pm2 stop sinhtondaihoc
 ### 🎵 Nhạc (21)
 `/play` `/search` `/skip` `/stop` `/pause` `/resume` `/queue` `/nowplaying` `/volume` `/loop` `/shuffle` `/clear` `/move` `/remove` `/seek` `/jump` `/leave` `/lyrics` `/playlist` `/autoplay` `/247`
 
-### 🎮 Game (14)
-`/taixiu` `/slots` `/xocdia` `/flip` `/poker` `/pokerbot` `/blackjack` `/videopoker` `/trivia` `/baucua` `/rongho` `/hilo` `/wheel` `/game-stats`
+### 🎮 Game (15)
+`/taixiu` `/slots` `/xocdia` `/flip` `/poker` `/pokerbot` `/blackjack` `/videopoker` `/trivia` `/trivia-reload` `/baucua` `/rongho` `/hilo` `/wheel` `/game-stats`
 
 ### 💰 Kinh tế (4)
 `/daily` `/balance` `/leaderboard-xu` `/chuyenxu`
@@ -93,6 +93,22 @@ pm2 stop sinhtondaihoc
 `/settings` — cấu hình voice tạm, danh mục, log, role DJ, âm lượng, queue, idle, autoplay, 24/7 (chỉ admin).
 
 Xem chi tiết ngay trong Discord bằng `/help`.
+
+## Tùy chỉnh Trivia
+
+- Câu hỏi: `data/trivia.json` — mảng `{ "q", "choices": [4 đáp án], "answer": 0..3 }`.
+- Cấu hình: `data/trivia-config.json`:
+  ```json
+  {
+    "rewards": [500, 300, 100, 50],
+    "cooldown_seconds": 30,
+    "timeout_seconds": 25
+  }
+  ```
+- Thưởng trong ngày reset lúc 00:00 giờ Việt Nam; hết 4 lượt thì vẫn chơi nhưng nhận 0 xu.
+- Mỗi người trả lời đúng phải chờ `cooldown_seconds` mới được trả lời tiếp.
+- Sửa file xong dùng `/trivia-reload` (chỉ admin) để nạp lại, không cần restart.
+- Khi đóng gói DisCloud phải kèm `data/trivia.json` và `data/trivia-config.json`; chỉ loại DB/WAL/SHM.
 
 ## Dữ liệu & sao lưu
 
@@ -123,6 +139,8 @@ Bộ test thuần Node (không cần framework) gồm:
 - **Poker evaluator:** 9 hạng bài, tie-break, wheel, chọn best 5/7 lá.
 - **Cờ vua:** perft độ sâu 1–4 (20 / 400 / 8.902 / 197.281), nhập thành, en passant, phong cấp, chiếu hết, stalemate.
 - **Caro/Gomoku:** thắng ngang/dọc/chéo, chặn nước sai, ô đã có quân, sai lượt.
+- **Bầu Cua:** nhiều cửa cược, trúng 1–2 viên, trượt hết, tổng lời/lỗ.
+- **Trivia:** thưởng 500/300/100/50/0, cooldown, reset ngày giờ Việt Nam, kiểm tra file câu hỏi/cấu hình.
 
 Kiểm tra cú pháp toàn bộ file:
 
