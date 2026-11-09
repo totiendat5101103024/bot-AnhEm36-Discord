@@ -6,7 +6,7 @@
  * Câu hỏi: data/trivia.json (có bộ dự phòng trong triviaFallback.js).
  * Cấu hình: data/trivia-config.json.
  * Thưởng trong ngày: 500 → 300 → 100 → 50 → 0, reset 00:00 giờ Việt Nam.
- * Cooldown: 30 giây sau khi trả lời đúng, riêng từng người.
+ * Cooldown: 30 phút sau khi trả lời đúng, riêng từng người.
  */
 
 const fs = require('fs');
@@ -23,6 +23,7 @@ const {
     dateKey,
     rewardFor,
     cooldownRemainingMs,
+    formatCooldown,
 } = require('./triviaRewards');
 const FALLBACK_QUESTIONS = require('./triviaFallback');
 
@@ -198,9 +199,8 @@ async function handleButton(interaction, sessionId, rawIndex) {
         config.cooldown_seconds,
     );
     if (remaining > 0) {
-        const seconds = Math.ceil(remaining / 1000);
         return interaction.reply({
-            content: `⏳ Bạn vừa trả lời đúng, chờ **${seconds} giây** nữa mới được trả lời tiếp.`,
+            content: `⏳ Bạn vừa trả lời đúng, chờ **${formatCooldown(remaining)}** nữa mới được trả lời tiếp.`,
             ephemeral: true,
         });
     }

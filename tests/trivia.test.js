@@ -25,13 +25,21 @@ test('thưởng theo danh sách tùy chỉnh', () => {
     eq(rewards.rewardFor(0, []), 500, 'danh sách rỗng dùng mặc định');
 });
 
-test('cooldown 30 giây', () => {
+test('cooldown 30 phút', () => {
     const last = 1_000_000;
-    eq(rewards.cooldownRemainingMs(last, last, 30), 30_000);
-    eq(rewards.cooldownRemainingMs(last, last + 10_000, 30), 20_000);
-    eq(rewards.cooldownRemainingMs(last, last + 30_000, 30), 0);
-    eq(rewards.cooldownRemainingMs(0, last, 30), 0);
+    eq(rewards.cooldownRemainingMs(last, last, 1800), 1_800_000);
+    eq(rewards.cooldownRemainingMs(last, last + 10_000, 1800), 1_790_000);
+    eq(rewards.cooldownRemainingMs(last, last + 1_800_000, 1800), 0);
+    eq(rewards.cooldownRemainingMs(0, last, 1800), 0);
     eq(rewards.cooldownRemainingMs(last, last, 0), 0);
+});
+
+test('hiển thị cooldown thân thiện', () => {
+    eq(rewards.formatCooldown(1_800_000), '30 phút');
+    eq(rewards.formatCooldown(90_000), '1 phút 30 giây');
+    eq(rewards.formatCooldown(45_000), '45 giây');
+    eq(rewards.formatCooldown(3_600_000), '1 giờ');
+    eq(rewards.formatCooldown(5_400_000), '1 giờ 30 phút');
 });
 
 test('reset ngày theo giờ Việt Nam', () => {
@@ -55,6 +63,6 @@ test('data/trivia-config.json hợp lệ', () => {
     const file = path.join(__dirname, '..', 'data', 'trivia-config.json');
     const config = JSON.parse(fs.readFileSync(file, 'utf-8'));
     eq(config.rewards, [500, 300, 100, 50]);
-    eq(config.cooldown_seconds, 30);
+    eq(config.cooldown_seconds, 1800);
     assert(Number.isInteger(config.timeout_seconds) && config.timeout_seconds >= 5, 'timeout phải >= 5');
 });

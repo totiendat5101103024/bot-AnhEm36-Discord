@@ -8,7 +8,7 @@
 const VN_TZ = 'Asia/Ho_Chi_Minh';
 
 const DEFAULT_REWARDS = [500, 300, 100, 50];
-const DEFAULT_COOLDOWN_SECONDS = 30;
+const DEFAULT_COOLDOWN_SECONDS = 1800;
 const DEFAULT_TIMEOUT_SECONDS = 25;
 
 /** Ngày theo giờ Việt Nam, dạng YYYY-MM-DD. */
@@ -30,6 +30,20 @@ function cooldownRemainingMs(lastCorrectAt, nowMs, cooldownSeconds) {
     return remaining > 0 ? remaining : 0;
 }
 
+/** Hiển thị thời gian chờ thân thiện: "30 phút", "1 phút 30 giây", "45 giây". */
+function formatCooldown(ms) {
+    const totalSeconds = Math.ceil(ms / 1000);
+    if (totalSeconds <= 0) return '0 giây';
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) return minutes > 0 ? `${hours} giờ ${minutes} phút` : `${hours} giờ`;
+    if (minutes > 0) return seconds > 0 ? `${minutes} phút ${seconds} giây` : `${minutes} phút`;
+    return `${seconds} giây`;
+}
+
 module.exports = {
     VN_TZ,
     DEFAULT_REWARDS,
@@ -38,4 +52,5 @@ module.exports = {
     dateKey,
     rewardFor,
     cooldownRemainingMs,
+    formatCooldown,
 };

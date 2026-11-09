@@ -101,7 +101,7 @@ Xem chi tiết ngay trong Discord bằng `/help`.
   ```json
   {
     "rewards": [500, 300, 100, 50],
-    "cooldown_seconds": 30,
+    "cooldown_seconds": 1800,
     "timeout_seconds": 25
   }
   ```
