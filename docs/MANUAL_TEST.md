@@ -65,33 +65,24 @@ Mỗi mục ghi rõ **cách làm** và **kết quả mong đợi**. Đánh dấu
 - [ ] `/voice kick @user` mời người ra; `/voice transfer @user` chuyển chủ.
 - [ ] Chủ rời kênh → người ở lại `/voice claim` nhận quyền.
 - [ ] Kênh tạm trống → bot tự xoá.
-- [ ] `/voice stats` hiện tổng giờ, giờ học, số phiên.
+- [ ] `/voice stats` hiện tổng giờ và số phiên.
 
-## 6. Study
-
-- [ ] `/study start mon_hoc:"Giải tích" phut:60` khi đang ở voice → tạo phiên, thông báo kênh.
-- [ ] Vào voice trong phiên → thời gian được ghi nhận.
-- [ ] `/study rank ky:week` hiện bảng xếp hạng giờ học.
-- [ ] `/study stop` → thông báo tổng kết, thời gian học dừng lại.
-- [ ] Restart bot khi phiên đang chạy → phiên được khôi phục và tự kết thúc đúng giờ.
-- [ ] Thời gian voice trước/sau phiên học không bị tính lẫn vào giờ học.
-
-## 7. Settings
+## 6. Settings
 
 - [ ] `/settings` (admin) hiện toàn bộ cấu hình.
 - [ ] Đổi âm lượng mặc định, giới hạn queue, idle timeout, autoplay, 24/7 → lưu đúng.
 - [ ] `/settings dat_lai:true` reset về mặc định.
 - [ ] Người không phải admin bị chặn.
 
-## 8. Vận hành
+## 7. Vận hành
 
 - [ ] `./scripts/backup-db.sh --dry-run` in đường dẫn, không tạo file.
 - [ ] `./scripts/backup-db.sh` tạo bản backup trong `backups/db/`, ghi `logs/backup.log`.
 - [ ] Tạo file `logs/bot-2000-01-01.log` cũ rồi restart → file được đưa vào trash.
-- [ ] `pm2 restart sinhtondaihoc` → bot lên lại, không mất dữ liệu, phiên study/board còn nguyên.
+- [ ] `pm2 restart sinhtondaihoc` → bot lên lại, không mất dữ liệu, ván board còn nguyên.
 - [ ] `npm test` → 37/37 pass.
 
-## 9. Kết luận
+## 8. Kết luận
 
 - [ ] Không có lỗi trong `logs/pm2-error.log` và `logs/bot-YYYY-MM-DD.log`.
 - [ ] Đã sao lưu DB trước khi đưa lên server thật.

@@ -21,9 +21,7 @@ const CATEGORY_FLAT = {
     daily: 'economy', balance: 'economy', 'leaderboard-xu': 'economy',
     chuyenxu: 'economy',
     taixiu: 'games', slots: 'games', xocdia: 'games', flip: 'games',
-    deadline: 'study',
-    'deadline-list': 'study', 'deadline-done': 'study', pomodoro: 'study',
-    hopdinhky: 'study', help: 'util', ping: 'util', alternos: 'util',
+    help: 'util', ping: 'util', alternos: 'util',
 };
 
 function walk(dir) {

@@ -3,7 +3,7 @@
 /**
  * events/voiceStateUpdate.js
  *  - Temp voice "Join to Create"
- *  - Ghi phiên voice để tính giờ học
+ *  - Ghi phiên voice để thống kê thời gian
  */
 
 const { ChannelType, PermissionFlagsBits } = require('discord.js');
@@ -21,16 +21,9 @@ const closeSession = db.prepare(`
     WHERE guild_id = ? AND user_id = ? AND left_at IS NULL
 `);
 const openSession = db.prepare(`
-    INSERT INTO voice_sessions (guild_id, user_id, channel_id, channel_name, joined_at, study, subject)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO voice_sessions (guild_id, user_id, channel_id, channel_name, joined_at)
+    VALUES (?, ?, ?, ?, ?)
 `);
-const getStudySession = db.prepare(`
-    SELECT * FROM study_sessions WHERE channel_id = ? AND active = 1 LIMIT 1
-`);
-
-function isStudy(channelId) {
-    return getStudySession.get(channelId) || null;
-}
 
 async function createTempChannel(state) {
     const guild = state.guild;
@@ -123,15 +116,12 @@ async function trackSession(oldState, newState) {
 
     if (!newState.channelId) return;
 
-    const study = isStudy(newState.channelId);
     openSession.run(
         newState.guild.id,
         newState.id,
         newState.channelId,
         newState.channel?.name || null,
         Date.now(),
-        study ? 1 : 0,
-        study?.subject || null,
     );
 }
 

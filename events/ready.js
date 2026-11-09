@@ -7,7 +7,6 @@
 const { ActivityType } = require('discord.js');
 const logger = require('../utils/logger');
 const { db } = require('../utils/db');
-const { startDeadlineReminders } = require('../jobs/deadlines');
 const { startIdleWatcher } = require('../jobs/idle');
 const { refundStaleEscrow } = require('../games/poker/manager');
 
@@ -78,7 +77,6 @@ module.exports = {
             status: 'online',
         });
 
-        startDeadlineReminders(client);
         startIdleWatcher(client);
 
         try {
@@ -92,12 +90,6 @@ module.exports = {
             await cleanupTempChannels(client);
         } catch (err) {
             logger.error('[ready] Lỗi dọn dẹp phiên cũ:', err);
-        }
-
-        try {
-            require('../utils/studyManager').resumeAll(client);
-        } catch (err) {
-            logger.debug('[ready] Chưa có studyManager:', err.message);
         }
     },
 };

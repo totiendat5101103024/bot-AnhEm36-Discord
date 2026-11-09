@@ -1,6 +1,6 @@
 # Sinh Tồn Đại Học Bot
 
-Discord bot cho nhóm sinh viên: nhạc, kinh tế xu ảo, mini game, board game async, voice tạm và phiên học nhóm.
+Discord bot cho nhóm sinh viên: nhạc, kinh tế xu ảo, mini game, board game async và voice tạm.
 
 - **Ngôn ngữ:** Node.js (CommonJS), Discord.js v14
 - **Dữ liệu:** SQLite (`better-sqlite3`), schema tự migrate theo `user_version`
@@ -57,7 +57,6 @@ pm2 stop sinhtondaihoc
 | `DISCORD_TOKEN` | ✅ | Token bot Discord |
 | `CLIENT_ID` | ✅ | Application ID, dùng cho `npm run deploy` |
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | — | Tùy chọn cho tìm nhạc Spotify |
-| `DEADLINE_CHANNEL_ID` | — | Kênh nhận nhắc deadline |
 | `DB_PATH` | — | Đường dẫn SQLite, mặc định `data/economy.db` |
 | `YTDLP_PATH` | — | Binary yt-dlp tùy chỉnh |
 | `LOG_KEEP_DAYS` | — | Số ngày giữ log `bot-*.log`, mặc định `14` |
@@ -79,11 +78,8 @@ pm2 stop sinhtondaihoc
 ### ♟️ Board game (4)
 `/caro` `/chess` `/xiangqi` `/board` (`move|resign|list|rank|history`)
 
-### 🔊 Voice & Study (1 + lệnh học)
+### 🔊 Voice (1)
 `/voice` (`name|limit|lock|unlock|kick|claim|transfer|stats`)
-
-### 📚 Học tập (6)
-`/study` (`start|stop|rank`) `/pomodoro` `/deadline` `/deadline-list` `/deadline-done` `/hopdinhky`
 
 ### 🛠️ Tiện ích (3)
 `/help` `/ping` `/alternos`
@@ -160,8 +156,8 @@ commands/             # slash command, chia theo nhóm
 components/           # handler nút / select / modal
 events/               # interactionCreate, ready, voiceStateUpdate, distube
 games/                # engine game thuần (poker, blackjack, board...)
-jobs/                 # cron: deadline, idle watcher
-utils/                # db, logger, economy, settings, studyManager...
+jobs/                 # cron: idle watcher
+utils/                # db, logger, economy, settings, voiceStats...
 scripts/              # backup DB
 tests/                # test logic thuần Node
 data/                 # SQLite + dữ liệu runtime (không commit)

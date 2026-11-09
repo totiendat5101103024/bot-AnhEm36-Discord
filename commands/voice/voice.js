@@ -103,7 +103,6 @@ module.exports = {
                     description: `Khoảng: **${periodLabel}**`,
                     fields: [
                         { name: 'Tổng thời gian', value: `**${humanDuration(stats.total)}**`, inline: true },
-                        { name: 'Thời gian học', value: `**${humanDuration(stats.study)}**`, inline: true },
                         { name: 'Số phiên', value: `**${stats.sessions}**`, inline: true },
                     ],
                 })],
