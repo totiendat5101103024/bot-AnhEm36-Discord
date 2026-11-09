@@ -27,12 +27,16 @@ npm install
 cp .env.example .env
 # Mở .env và điền DISCORD_TOKEN, CLIENT_ID, các ID kênh nếu dùng
 
-# Đăng ký slash command
+# Đăng ký slash command (chỉ chọn MỘT: global hoặc guild)
 npm run deploy
+# hoặc hiện ngay trong 1 server:
+npm run deploy -- --guild <GUILD_ID>
 
 # Chạy thử
 npm start
 ```
+
+> Không deploy cả global lẫn guild cho cùng bộ lệnh — Discord sẽ hiển thị **2 dòng trùng nhau** trong ô nhập lệnh. Nếu đã lỡ deploy cả hai, xoá bản global bằng `npm run deploy -- --clear`.
 
 ### Chạy bằng PM2 (khuyến nghị khi chạy local 24/7)
 
