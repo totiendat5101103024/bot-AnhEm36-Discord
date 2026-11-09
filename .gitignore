@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Secrets & môi trường
+.env
+.env.*
+!.env.example
+
+# Dữ liệu runtime
+data/*
+!data/.gitkeep
+
+# Log & backup
+logs/
+backups/
+*.log
+sinhtondaihoc
+
+# Hệ điều hành / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# File nén cũ
+bot.zip
+
+# PM2
+.pm2/

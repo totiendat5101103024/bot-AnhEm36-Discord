@@ -1,0 +1,28 @@
+{
+  "name": "sinhtondaihoc_bot",
+  "version": "2.0.0",
+  "description": "Discord bot cho nhóm Sinh Tồn Đại Học — nhạc, xu ảo, NCKH",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "deploy": "node deploy.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/voice": "^0.19.2",
+    "@distube/yt-dlp": "^2.0.1",
+    "better-sqlite3": "^11.8.1",
+    "discord.js": "^14.26.4",
+    "distube": "^5.2.3",
+    "dotenv": "^17.4.2",
+    "ffmpeg-static": "^5.3.0",
+    "node-cron": "^3.0.3",
+    "sodium-native": "^4.3.1",
+    "xml2js": "^0.6.2"
+  }
+}
