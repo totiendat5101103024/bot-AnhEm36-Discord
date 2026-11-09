@@ -154,6 +154,7 @@
 - [x] Script backup DB (`--dry-run`, log)
 - [x] Log rotate tự động: xoay theo ngày + dọn `bot-*.log` cũ hơn `LOG_KEEP_DAYS` ngày bằng `gio trash`
 - [x] Checklist test tay trên guild riêng (`docs/MANUAL_TEST.md`)
+- [x] Deploy 56 lệnh global + chạy PM2; bot online (`AnhEm36#2223`, 1 server), log không lỗi
 
 ### Kết quả kiểm tra Giai đoạn 4
 
@@ -166,6 +167,8 @@
 | Log rotate | ✅ file `bot-2000-01-01.log` cũ được đưa vào trash khi khởi động, log hôm nay giữ nguyên |
 | README / `.env.example` | ✅ đủ cài đặt, cấu hình, PM2, 56 lệnh / 8 nhóm, backup, test |
 | Tài liệu test tay | ✅ `docs/MANUAL_TEST.md` — 9 nhóm, có kết quả mong đợi |
+| Deploy lệnh | ✅ 56 lệnh global nộp thành công (có thể chờ tới 1 giờ để hiện) |
+| Chạy thật | ✅ PM2 online, bot `AnhEm36#2223` kết nối 1 server, 0 lỗi trong `pm2-error.log` |
 
 ---
 
@@ -202,3 +205,4 @@
 - 2026-11-09: Hoàn tất Giai đoạn 2 — poker 2–6 người + bot Monte Carlo, blackjack, video poker, trivia, Bầu Cua, Rồng Hổ, Hi-Lo, Vòng quay, `/game-stats`, escrow/hoàn tiền khi restart. Đã kiểm tra tĩnh + 80 ván poker + 300 ván blackjack + 200 ván video poker + 60 câu trivia + 320 ván game nhỏ + side-pot + escrow, 0 lỗi.
 - 2026-11-09: Hoàn tất Giai đoạn 3 — Caro/Gomoku, cờ vua (perft 4 = 197.281), cờ tướng, Elo + lưu ván SQLite, `/board`; voice tạm Join-to-Create, `/voice`, `/study`, thống kê giờ voice tuần/tháng, `/settings`. Đã kiểm tra engine, persistence, Elo, voice ops, study start/stop/rank + resume, 0 lỗi.
 - 2026-11-09: Hoàn tất Giai đoạn 4 — thêm bộ test logic thuần `tests/` (`npm test`, 37/37 pass), log rotate tự động dọn log cũ bằng `gio trash`, README + `.env.example` (`LOG_KEEP_DAYS`), `docs/MANUAL_TEST.md`. Đã chạy lại `node --check` toàn bộ, harness nạp 56 lệnh / 4 event / 9 prefix, 0 lỗi.
+- 2026-11-09: Triển khai thật — nộp 56 lệnh global thành công, `pm2 start ecosystem.config.js` đưa bot online (`AnhEm36#2223`, 1 server), DB schema v6, deadline cron + idle watcher + đối soát voice phiên chạy bình thường, `pm2-error.log` trống.
