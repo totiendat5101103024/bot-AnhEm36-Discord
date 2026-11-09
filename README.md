@@ -74,8 +74,8 @@ pm2 stop sinhtondaihoc
 ### 🎮 Game (14)
 `/taixiu` `/slots` `/xocdia` `/flip` `/poker` `/pokerbot` `/blackjack` `/videopoker` `/trivia` `/baucua` `/rongho` `/hilo` `/wheel` `/game-stats`
 
-### 💰 Kinh tế (3)
-`/daily` `/balance` `/leaderboard-xu`
+### 💰 Kinh tế (4)
+`/daily` `/balance` `/leaderboard-xu` `/chuyenxu`
 
 ### ♟️ Board game (4)
 `/caro` `/chess` `/xiangqi` `/board` (`move|resign|list|rank|history`)

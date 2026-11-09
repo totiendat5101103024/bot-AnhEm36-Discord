@@ -19,6 +19,7 @@ const CATEGORY_FLAT = {
     play: 'music', skip: 'music', stop: 'music', queue: 'music', pause: 'music',
     resume: 'music', volume: 'music', loop: 'music', nowplaying: 'music',
     daily: 'economy', balance: 'economy', 'leaderboard-xu': 'economy',
+    chuyenxu: 'economy',
     taixiu: 'games', slots: 'games', xocdia: 'games', flip: 'games',
     zotero: 'study', arxiv: 'study', trichdan: 'study', deadline: 'study',
     'deadline-list': 'study', 'deadline-done': 'study', pomodoro: 'study',
