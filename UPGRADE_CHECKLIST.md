@@ -11,10 +11,10 @@
 | 0. Nền tảng & an toàn | `[x]` | Hoàn tất, đã kiểm tra |
 | 1. Nhạc | `[x]` | Hoàn tất, đã kiểm tra |
 | 2. Game | `[x]` | Hoàn tất 14 lệnh game, đã kiểm tra logic + mô phỏng |
-| 3. Board game + Voice | `[ ]` | Chưa bắt đầu |
+| 3. Board game + Voice | `[x]` | Hoàn tất Caro/Cờ vua/Cờ tướng, voice tạm, study, settings |
 | 4. QA & vận hành | `[ ]` | Chưa bắt đầu (mới có kiểm tra tĩnh) |
 
-> **Điểm dừng hiện tại: hết Giai đoạn 2.** Đã xong poker (2–6 người + bot), blackjack, video poker, trivia, Bầu Cua, Rồng Hổ, Hi-Lo, Vòng quay, `/game-stats`, escrow/hoàn tiền khi restart. Chưa làm Giai đoạn 3–4.
+> **Điểm dừng hiện tại: hết Giai đoạn 3.** Đã xong board game async (Caro, cờ vua, cờ tướng) + Elo/lịch sử, voice tạm Join-to-Create, `/voice`, `/study`, thống kê giờ voice và `/settings`. Chưa làm Giai đoạn 4.
 
 ---
 
@@ -109,20 +109,42 @@
 
 > Escrow poker dùng bảng `poker_escrow` (schema v6). Khi bot restart giữa ván, toàn bộ tiền mua chip còn `held` được hoàn lại tự động.
 
-## Giai đoạn 3 — Board game async + Voice `[ ]`
+## Giai đoạn 3 — Board game async + Voice `[x]`
 
-- [ ] Caro/Gomoku 15×15, thách đấu, Elo
-- [ ] Cờ vua (engine đầy đủ: castling, en passant, promotion, checkmate)
-- [ ] Cờ tướng (tuỳ thời gian)
-- [ ] Lưu ván trong SQLite, chơi qua nhiều ngày
-- [ ] `/board rank`, lịch sử đấu
-- [ ] Temp Voice "Join to Create"
-- [ ] `/voice name|limit|lock|unlock|kick|claim|transfer`
-- [ ] `/study start|stop|rank`
-- [ ] Ghi giờ voice + thống kê tuần/tháng
-- [ ] `/settings` cho admin
+- [x] Caro/Gomoku 15×15, thách đấu, Elo (`games/board/caro.js`, `/caro`, `/board`)
+- [x] Cờ vua engine đầy đủ: castling, en passant, promotion, check, checkmate, stalemate, 50 nước, lặp 3 lần, thiếu quân
+- [x] Cờ tướng: luật đi quân, cung, sông, cản mã, mặt tướng, chiếu hết / hết nước tính thua
+- [x] Lưu ván trong SQLite (`board_games`, `board_stats`), chơi async qua nhiều ngày
+- [x] Nút **Đánh** mở modal nhập nước đi; nút **Xin thua**; `/board move` dự phòng khi message cũ
+- [x] `/board rank`, `/board history`, `/board list`
+- [x] Temp Voice "Join to Create" qua `/settings kenh_tao_voice`
+- [x] `/voice name|limit|lock|unlock|kick|claim|transfer`
+- [x] `/voice stats` — thời gian voice 7 ngày / 30 ngày / tất cả
+- [x] `/study start|stop|rank` — phiên học voice, thông báo kết thúc, xếp hạng giờ học
+- [x] Ghi giờ voice + thống kê tuần/tháng (`voice_sessions`, `utils/voiceStats.js`)
+- [x] Chia phiên voice tại mốc bắt đầu/kết thúc study để không tính lẫn giờ học
+- [x] Khôi phục phiên study đang chạy sau restart (`resumeAll` trong `events/ready.js`)
+- [x] `/settings` cho admin — voice tạm, danh mục, log, DJ, âm lượng, queue, idle, autoplay, 24/7
 
-> Schema v5 đã có `voice_sessions`, `temp_channels`, `study_sessions`; `events/voiceStateUpdate.js` đã ghi phiên voice và tạo kênh tạm cơ bản. `events/ready.js` gọi `studyManager` trong `try/catch` (module chưa tồn tại — bỏ qua an toàn).
+### Kết quả kiểm tra Giai đoạn 3
+
+| Hạng mục | Kết quả |
+|---|---|
+| Cờ vua perft độ sâu 1–4 | ✅ 20 / 400 / 8.902 / 197.281 — khớp chuẩn |
+| Cờ vua: nhập thành, en passant, phong cấp, chiếu hết (fool's mate), stalemate | ✅ tất cả đúng |
+| Cờ tướng: nước đi hợp lệ ban đầu / perft 2 | ✅ 44 / 1.920 |
+| Cờ tướng: mặt tướng, cản mã, cung, sông, chiếu | ✅ kiểm tra bằng thế cờ dựng tay |
+| Caro: nối 5 quân, phát hiện thắng, tọa độ sai | ✅ đúng, không nhận nước sai |
+| Lưu ván SQLite + đọc lại sau khi đi nước | ✅ state/lượt đi còn nguyên |
+| Elo + thắng/thua/hoà | ✅ cập nhật đúng, tổng Elo bảo toàn tương đối |
+| `/board rank`, `/board history`, `/board list` | ✅ không lỗi, hiển thị đúng |
+| Voice: name/limit/lock/unlock/kick/claim/transfer | ✅ đổi tên, giới hạn, quyền, chuyển chủ đúng |
+| Study: start/stop/rank, resume sau restart | ✅ tạo/đóng phiên, aggregate giờ đúng |
+| Voice stats tuần/tháng/all | ✅ tính cả phiên đang mở, tách giờ học |
+| `/settings` hiển thị + cập nhật + reset | ✅ lưu DB, cache làm mới đúng |
+| `node --check` toàn bộ `.js` | ✅ 0 lỗi |
+| Nạp lệnh / event / component | ✅ 56 lệnh, 4 event, 9 prefix (`search, blackjack, board, help, music, poker, queue, trivia, vp`) |
+| `/help` và deploy JSON | ✅ 8 nhóm, 56 tên duy nhất |
 
 ## Giai đoạn 4 — QA & vận hành `[ ]`
 
@@ -140,13 +162,16 @@
 | Hạng mục | Kết quả |
 |---|---|
 | `node --check` toàn bộ `.js` | ✅ 0 lỗi |
-| Nạp lệnh | ✅ 49 lệnh, không trùng tên |
+| Nạp lệnh | ✅ 56 lệnh, không trùng tên |
 | Nạp event | ✅ 4 event (`interactionCreate`, `clientReady`, `voiceStateUpdate`, DisTube setup) |
-| Component handler | ✅ 8 prefix: `search`, `blackjack`, `help`, `music`, `poker`, `queue`, `trivia`, `vp` |
-| `/help` embed | ✅ 5 nhóm hiển thị đúng (Game 14 lệnh) |
-| Deploy JSON | ✅ 49 lệnh, 49 tên duy nhất |
+| Component handler | ✅ 9 prefix: `search`, `blackjack`, `board`, `help`, `music`, `poker`, `queue`, `trivia`, `vp` |
+| `/help` embed | ✅ 8 nhóm hiển thị đúng (Game 14, Board 4) |
+| Deploy JSON | ✅ 56 lệnh, 56 tên duy nhất |
 | Economy | ✅ daily, debit/credit, transfer, refund, thống kê, leaderboard |
 | Game helper | ✅ cược → thắng/thua/hoàn tiền, transaction log đúng |
+| Board game | ✅ Caro/cờ vua/cờ tướng, perft cờ vua 197.281, Elo + lưu SQLite |
+| Voice & Study | ✅ voice tạm, `/voice`, `/study`, thống kê tuần/tháng, resume sau restart |
+| Settings | ✅ admin-only, cập nhật DB + cache, reset mặc định |
 | Idle watcher | ✅ giả lập: paused >10 phút và kênh trống >60s đều stop + leave |
 | Migration DB thật (bản copy) | ✅ v0 → v6, đủ 12 bảng, DB gốc không bị đụng |
 | Backup script | ✅ `--dry-run` chạy sạch, không tạo file |
@@ -161,3 +186,4 @@
 - 2026-11-09: Hoàn tất code Giai đoạn 0 + 1; thêm idle watcher, chặn giới hạn queue, dọn panel khi `deleteQueue`; rà soát và chốt Giai đoạn 0–1.
 - 2026-11-09: Giai đoạn 2 mới hoàn thành phần kinh tế + 4 game cũ (`taixiu`, `slots`, `xocdia`, `flip`); dừng ở đây theo yêu cầu.
 - 2026-11-09: Hoàn tất Giai đoạn 2 — poker 2–6 người + bot Monte Carlo, blackjack, video poker, trivia, Bầu Cua, Rồng Hổ, Hi-Lo, Vòng quay, `/game-stats`, escrow/hoàn tiền khi restart. Đã kiểm tra tĩnh + 80 ván poker + 300 ván blackjack + 200 ván video poker + 60 câu trivia + 320 ván game nhỏ + side-pot + escrow, 0 lỗi.
+- 2026-11-09: Hoàn tất Giai đoạn 3 — Caro/Gomoku, cờ vua (perft 4 = 197.281), cờ tướng, Elo + lưu ván SQLite, `/board`; voice tạm Join-to-Create, `/voice`, `/study`, thống kê giờ voice tuần/tháng, `/settings`. Đã kiểm tra engine, persistence, Elo, voice ops, study start/stop/rank + resume, 0 lỗi.
