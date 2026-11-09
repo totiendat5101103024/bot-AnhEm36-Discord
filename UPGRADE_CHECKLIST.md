@@ -12,9 +12,9 @@
 | 1. Nhạc | `[x]` | Hoàn tất, đã kiểm tra |
 | 2. Game | `[x]` | Hoàn tất 14 lệnh game, đã kiểm tra logic + mô phỏng |
 | 3. Board game + Voice | `[x]` | Hoàn tất Caro/Cờ vua/Cờ tướng, voice tạm, study, settings |
-| 4. QA & vận hành | `[ ]` | Chưa bắt đầu (mới có kiểm tra tĩnh) |
+| 4. QA & vận hành | `[x]` | Hoàn tất test logic, README, log rotate, checklist test tay |
 
-> **Điểm dừng hiện tại: hết Giai đoạn 3.** Đã xong board game async (Caro, cờ vua, cờ tướng) + Elo/lịch sử, voice tạm Join-to-Create, `/voice`, `/study`, thống kê giờ voice và `/settings`. Chưa làm Giai đoạn 4.
+> **Điểm dừng hiện tại: hoàn tất Giai đoạn 4.** Đã xong QA & vận hành: bộ test logic thuần (`npm test`), README + `.env.example`, log rotate tự động dọn log cũ bằng `gio trash`, checklist test tay trên guild riêng. Dự án đã sẵn sàng chạy thật sau khi test tay.
 
 ---
 
@@ -146,14 +146,26 @@
 | Nạp lệnh / event / component | ✅ 56 lệnh, 4 event, 9 prefix (`search, blackjack, board, help, music, poker, queue, trivia, vp`) |
 | `/help` và deploy JSON | ✅ 8 nhóm, 56 tên duy nhất |
 
-## Giai đoạn 4 — QA & vận hành `[ ]`
+## Giai đoạn 4 — QA & vận hành `[x]`
 
 - [x] `node --check` toàn bộ file (đã chạy, 0 lỗi)
-- [ ] Test logic thuần: poker evaluator, chess, caro
-- [ ] README + cập nhật `.env.example` lần cuối
+- [x] Test logic thuần: poker evaluator, chess, caro (`tests/`, `npm test` — 37/37 pass)
+- [x] README + cập nhật `.env.example` lần cuối (`README.md`, `LOG_KEEP_DAYS`)
 - [x] Script backup DB (`--dry-run`, log)
-- [ ] Log rotate tự động (hiện xoay theo ngày, chưa xoá bản cũ)
-- [ ] Checklist test tay trên guild riêng
+- [x] Log rotate tự động: xoay theo ngày + dọn `bot-*.log` cũ hơn `LOG_KEEP_DAYS` ngày bằng `gio trash`
+- [x] Checklist test tay trên guild riêng (`docs/MANUAL_TEST.md`)
+
+### Kết quả kiểm tra Giai đoạn 4
+
+| Hạng mục | Kết quả |
+|---|---|
+| `npm test` — poker evaluator | ✅ 16 test: 9 hạng bài, tie-break, wheel, best 5/7 lá, lỗi dưới 5 lá |
+| `npm test` — cờ vua | ✅ 12 test: perft 1–4 (20 / 400 / 8.902 / 197.281), nhập thành, en passant, phong cấp, fool's mate, stalemate, chặn nước sai |
+| `npm test` — Caro | ✅ 9 test: thắng ngang/dọc/chéo, chưa đủ 5, tọa độ sai, ô đã có quân, sai lượt |
+| Tổng test | ✅ 37 pass, 0 fail |
+| Log rotate | ✅ file `bot-2000-01-01.log` cũ được đưa vào trash khi khởi động, log hôm nay giữ nguyên |
+| README / `.env.example` | ✅ đủ cài đặt, cấu hình, PM2, 56 lệnh / 8 nhóm, backup, test |
+| Tài liệu test tay | ✅ `docs/MANUAL_TEST.md` — 9 nhóm, có kết quả mong đợi |
 
 ---
 
@@ -174,7 +186,9 @@
 | Settings | ✅ admin-only, cập nhật DB + cache, reset mặc định |
 | Idle watcher | ✅ giả lập: paused >10 phút và kênh trống >60s đều stop + leave |
 | Migration DB thật (bản copy) | ✅ v0 → v6, đủ 12 bảng, DB gốc không bị đụng |
-| Backup script | ✅ `--dry-run` chạy sạch, không tạo file |
+| Backups DB | ✅ script `--dry-run` + `VACUUM INTO`, giữ 7 bản, dọn bằng `gio trash` |
+| Test logic thuần | ✅ `npm test`: 37/37 pass (poker, cờ vua, caro) |
+| Log rotate | ✅ dọn `bot-*.log` cũ hơn `LOG_KEEP_DAYS` ngày vào trash |
 
 > Chưa chạy bot thật với Discord (cần token/kết nối). Các kiểm tra trên là tĩnh + logic + mô phỏng.
 
@@ -187,3 +201,4 @@
 - 2026-11-09: Giai đoạn 2 mới hoàn thành phần kinh tế + 4 game cũ (`taixiu`, `slots`, `xocdia`, `flip`); dừng ở đây theo yêu cầu.
 - 2026-11-09: Hoàn tất Giai đoạn 2 — poker 2–6 người + bot Monte Carlo, blackjack, video poker, trivia, Bầu Cua, Rồng Hổ, Hi-Lo, Vòng quay, `/game-stats`, escrow/hoàn tiền khi restart. Đã kiểm tra tĩnh + 80 ván poker + 300 ván blackjack + 200 ván video poker + 60 câu trivia + 320 ván game nhỏ + side-pot + escrow, 0 lỗi.
 - 2026-11-09: Hoàn tất Giai đoạn 3 — Caro/Gomoku, cờ vua (perft 4 = 197.281), cờ tướng, Elo + lưu ván SQLite, `/board`; voice tạm Join-to-Create, `/voice`, `/study`, thống kê giờ voice tuần/tháng, `/settings`. Đã kiểm tra engine, persistence, Elo, voice ops, study start/stop/rank + resume, 0 lỗi.
+- 2026-11-09: Hoàn tất Giai đoạn 4 — thêm bộ test logic thuần `tests/` (`npm test`, 37/37 pass), log rotate tự động dọn log cũ bằng `gio trash`, README + `.env.example` (`LOG_KEEP_DAYS`), `docs/MANUAL_TEST.md`. Đã chạy lại `node --check` toàn bộ, harness nạp 56 lệnh / 4 event / 9 prefix, 0 lỗi.
