@@ -13,7 +13,7 @@ const SYMBOLS = baucua.SYMBOLS;
 function betOptions(builder) {
     for (const s of SYMBOLS) {
         builder.addIntegerOption((o) => o
-            .setName(s.key)
+            .setName(s.option)
             .setDescription(`Số xu đặt vào ${s.name} ${s.emoji}`)
             .setMinValue(50)
             .setMaxValue(5000));
@@ -50,7 +50,7 @@ module.exports = {
 
     async execute(interaction) {
         const bets = SYMBOLS
-            .map((s) => ({ key: s.key, amount: interaction.options.getInteger(s.key) || 0 }))
+            .map((s) => ({ key: s.key, amount: interaction.options.getInteger(s.option) || 0 }))
             .filter((b) => b.amount > 0);
 
         if (bets.length === 0) {

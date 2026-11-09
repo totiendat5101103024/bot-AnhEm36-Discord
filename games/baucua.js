@@ -9,12 +9,12 @@
 
 const GAME = 'baucua';
 const SYMBOLS = [
-    { key: 'bau', name: 'Bầu', emoji: '🍐' },
-    { key: 'cua', name: 'Cua', emoji: '🦀' },
-    { key: 'tom', name: 'Tôm', emoji: '🦐' },
-    { key: 'ca', name: 'Cá', emoji: '🐟' },
-    { key: 'ga', name: 'Gà', emoji: '🐓' },
-    { key: 'nai', name: 'Nai', emoji: '🦌' },
+    { key: 'bau', option: 'bầu', name: 'Bầu', emoji: '🍐' },
+    { key: 'cua', option: 'cua', name: 'Cua', emoji: '🦀' },
+    { key: 'tom', option: 'tôm', name: 'Tôm', emoji: '🦐' },
+    { key: 'ca', option: 'cá', name: 'Cá', emoji: '🐟' },
+    { key: 'ga', option: 'gà', name: 'Gà', emoji: '🐓' },
+    { key: 'nai', option: 'nai', name: 'Nai', emoji: '🦌' },
 ];
 
 function getSymbol(key) {
