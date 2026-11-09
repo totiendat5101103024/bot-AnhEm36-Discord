@@ -26,5 +26,8 @@ Thumbs.db
 # File nén cũ
 bot.zip
 
+# Gói deploy tạm
+dist/
+
 # PM2
 .pm2/
