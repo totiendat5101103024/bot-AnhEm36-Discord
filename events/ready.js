@@ -7,7 +7,6 @@
 const { ActivityType } = require('discord.js');
 const logger = require('../utils/logger');
 const { db } = require('../utils/db');
-const { startZoteroPolling } = require('../jobs/zotero');
 const { startDeadlineReminders } = require('../jobs/deadlines');
 const { startIdleWatcher } = require('../jobs/idle');
 const { refundStaleEscrow } = require('../games/poker/manager');
@@ -79,7 +78,6 @@ module.exports = {
             status: 'online',
         });
 
-        startZoteroPolling(client);
         startDeadlineReminders(client);
         startIdleWatcher(client);
 

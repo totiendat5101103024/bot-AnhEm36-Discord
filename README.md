@@ -5,7 +5,7 @@ Discord bot cho nhóm sinh viên: nhạc, kinh tế xu ảo, mini game, board ga
 - **Ngôn ngữ:** Node.js (CommonJS), Discord.js v14
 - **Dữ liệu:** SQLite (`better-sqlite3`), schema tự migrate theo `user_version`
 - **Nhạc:** DisTube + yt-dlp + ffmpeg-static
-- **Không cần dịch vụ ngoài** ngoài Discord (Spotify/Zotero là tùy chọn)
+- **Không cần dịch vụ ngoài** ngoài Discord (Spotify là tùy chọn)
 
 ## Yêu cầu
 
@@ -57,7 +57,6 @@ pm2 stop sinhtondaihoc
 | `DISCORD_TOKEN` | ✅ | Token bot Discord |
 | `CLIENT_ID` | ✅ | Application ID, dùng cho `npm run deploy` |
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | — | Tùy chọn cho tìm nhạc Spotify |
-| `ZOTERO_API_KEY` / `ZOTERO_LIBRARY_ID` / `ZOTERO_LIBRARY_TYPE` / `ZOTERO_CHANNEL_ID` | — | Tùy chọn cho lệnh Zotero |
 | `DEADLINE_CHANNEL_ID` | — | Kênh nhận nhắc deadline |
 | `DB_PATH` | — | Đường dẫn SQLite, mặc định `data/economy.db` |
 | `YTDLP_PATH` | — | Binary yt-dlp tùy chỉnh |
@@ -83,8 +82,8 @@ pm2 stop sinhtondaihoc
 ### 🔊 Voice & Study (1 + lệnh học)
 `/voice` (`name|limit|lock|unlock|kick|claim|transfer|stats`)
 
-### 📚 Học tập & NCKH (9)
-`/study` (`start|stop|rank`) `/pomodoro` `/deadline` `/deadline-list` `/deadline-done` `/zotero` `/arxiv` `/trichdan` `/hopdinhky`
+### 📚 Học tập (6)
+`/study` (`start|stop|rank`) `/pomodoro` `/deadline` `/deadline-list` `/deadline-done` `/hopdinhky`
 
 ### 🛠️ Tiện ích (3)
 `/help` `/ping` `/alternos`
@@ -161,7 +160,7 @@ commands/             # slash command, chia theo nhóm
 components/           # handler nút / select / modal
 events/               # interactionCreate, ready, voiceStateUpdate, distube
 games/                # engine game thuần (poker, blackjack, board...)
-jobs/                 # cron: deadline, zotero, idle watcher
+jobs/                 # cron: deadline, idle watcher
 utils/                # db, logger, economy, settings, studyManager...
 scripts/              # backup DB
 tests/                # test logic thuần Node

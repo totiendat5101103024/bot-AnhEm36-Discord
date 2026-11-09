@@ -22,7 +22,6 @@
     "ffmpeg-static": "^5.3.0",
     "node-cron": "^3.0.3",
     "opusscript": "^0.0.8",
-    "sodium-native": "^4.3.1",
-    "xml2js": "^0.6.2"
+    "sodium-native": "^4.3.1"
   }
 }
